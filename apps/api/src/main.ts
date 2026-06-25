@@ -16,7 +16,10 @@ async function bootstrap() {
 
   // Global prefix
   app.setGlobalPrefix('api', {
-    exclude: [{path:'/uploads/(.*)', method: RequestMethod.ALL}],
+    exclude: [
+      {path:'/uploads/(.*)', method: RequestMethod.ALL},
+      {path:'/documents/(.*)', method: RequestMethod.ALL},
+    ],
   });
 
   // Versioning
