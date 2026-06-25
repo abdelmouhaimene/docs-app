@@ -112,7 +112,7 @@ export class DemandesService {
                 directionId: directionId || undefined,
                 matricule: user.matricule, // The DOC user who integrated it
                 fileName: demande.filePath.split(/[\\/]/).pop() || 'file',
-                fileUrl: `/documents/${demande.filePath.split(/[\\/]/).pop()}`,
+                fileUrl: `/uploads/documents/${demande.filePath.split(/[\\/]/).pop()}`,
                 fileSize: demande.size,
                 mimeType: demande.mimetype,
                 createdBy: requester?._id.toString() || (user as any).userId,
