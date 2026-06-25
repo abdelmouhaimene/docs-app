@@ -1,0 +1,33 @@
+{
+  "name": "mca-docs",
+  "version": "1.0.0",
+  "description": "MCA Document Management System - Monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "libs/*"
+  ],
+  "scripts": {
+    "client:dev": "npm run dev --workspace=apps/client",
+    "client:build": "npm run build --workspace=apps/client",
+    "client:start": "npm run start --workspace=apps/client",
+    "api:dev": "npm run start:dev --workspace=apps/api",
+    "api:build": "npm run build --workspace=apps/api",
+    "api:start": "npm run start:prod --workspace=apps/api",
+    "dev": "concurrently \"npm run client:dev\" \"npm run api:dev\"",
+    "build": "npm run client:build && npm run api:build",
+    "prisma:generate": "npm run prisma:generate --workspace=libs/database",
+    "prisma:migrate": "npm run prisma:migrate --workspace=libs/database",
+    "prisma:studio": "npm run prisma:studio --workspace=libs/database"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "dependencies": {
+    "@nestjs/platform-express": "^10.4.22"
+  }
+}

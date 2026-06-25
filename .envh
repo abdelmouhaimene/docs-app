@@ -1,0 +1,27 @@
+
+
+# =====================================================
+# PRODUCTION ENVIRONMENT
+# Server IP: 192.168.1.19
+# =====================================================
+
+# MongoDB Configuration
+MONGO_ROOT_USERNAME=admin
+MONGO_ROOT_PASSWORD=DocPassword2026Secure
+MONGO_DATABASE=mca_docs_prod
+MONGO_PORT=27017
+
+# JWT Authentication
+JWT_SECRET=k7Xm2Qp9NvLw4RtY8ZcB3JhF6sDqA1eU
+JWT_EXPIRATION=30d
+
+# API Configuration
+API_PORT=4001
+CORS_ORIGIN=*
+API_PREFIX=/api/v1
+MAX_FILE_SIZE=10485760
+UPLOAD_PATH=/app/documents
+
+# Client Configuration
+CLIENT_PORT=4000
+NEXT_PUBLIC_API_URL=/api/v1
