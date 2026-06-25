@@ -14,11 +14,18 @@ async function bootstrap() {
   app.use(helmet());
   app.use(compression());
 
+  // Rewrite static files URL for /documents/ to include global prefix
+  app.use((req: any, res: any, next: any) => {
+    if (req.url.startsWith('/documents/') && req.url.includes('.')) {
+      req.url = '/api/v1' + req.url;
+    }
+    next();
+  });
+
   // Global prefix
   app.setGlobalPrefix('api', {
     exclude: [
       {path:'/uploads/(.*)', method: RequestMethod.ALL},
-      {path:'/documents/(.*)', method: RequestMethod.ALL},
     ],
   });
 
