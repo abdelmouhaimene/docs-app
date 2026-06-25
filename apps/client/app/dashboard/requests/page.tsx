@@ -236,7 +236,7 @@ export default function RequestsPage() {
         if (row.filePath) {
             // Static files are served at the root, not under /api/v1
             const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || '';
-            const fileUrl = `${baseUrl}/documents/${row.filePath.split(/[/\\]/).pop()}`;
+            const fileUrl = `${baseUrl}/uploads/documents/${row.filePath.split(/[/\\]/).pop()}`;
             window.open(fileUrl, '_blank');
         } else {
             toast.error('Fichier introuvable');
