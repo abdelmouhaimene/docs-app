@@ -52,16 +52,17 @@ import { CommentsModule } from './comments/comments.module';
     DashboardModule,
     CommentsModule,
 
-    // Static Files - serve at /documents/ for new uploads
-    ServeStaticModule.forRoot({
-      rootPath: join(process.env.UPLOAD_PATH || join(process.cwd(), 'uploads'), 'documents'),
-      serveRoot: '/documents',
-    }),
-    // Static Files - serve at /uploads/documents/ for backward compatibility with existing DB records
-    ServeStaticModule.forRoot({
-      rootPath: join(process.env.UPLOAD_PATH || join(process.cwd(), 'uploads'), 'documents'),
-      serveRoot: '/uploads/documents',
-    }),
+    // Static Files - serve at multiple roots
+    ServeStaticModule.forRoot(
+      {
+        rootPath: join(process.env.UPLOAD_PATH || join(process.cwd(), 'uploads'), 'documents'),
+        serveRoot: '/documents',
+      },
+      {
+        rootPath: join(process.env.UPLOAD_PATH || join(process.cwd(), 'uploads'), 'documents'),
+        serveRoot: '/uploads/documents',
+      }
+    ),
   ],
 })
 export class AppModule { }
