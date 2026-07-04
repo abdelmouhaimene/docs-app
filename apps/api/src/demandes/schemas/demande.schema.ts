@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 
 export type DemandeDocument = Demande & Document;
@@ -22,6 +22,10 @@ export class Demande {
     @ApiProperty({ description: 'User Matricule (Owner)' })
     @Prop({ required: true })
     matricule: string;
+
+    @ApiProperty({ description: 'Direction ID associated with the request', required: false })
+    @Prop({ type: Types.ObjectId, ref: 'Direction' })
+    directionId?: Types.ObjectId;
 
     @ApiProperty({ default: false })
     @Prop({ default: false })

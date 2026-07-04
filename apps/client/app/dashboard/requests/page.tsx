@@ -65,6 +65,7 @@ const createDemandeSchema = z.object({
     category: z.enum(['document', 'procedure'], {
         required_error: 'La catégorie est requise',
     }),
+    directionId: z.string().optional(),
 });
 
 type CreateDemandeForm = z.infer<typeof createDemandeSchema>;
@@ -76,6 +77,7 @@ export default function RequestsPage() {
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [directions, setDirections] = useState<any[]>([]);
 
     // Comments State
     const [commentsOpen, setCommentsOpen] = useState(false);
@@ -87,6 +89,7 @@ export default function RequestsPage() {
         defaultValues: {
             nom: '',
             category: 'document',
+            directionId: '',
         },
     });
 
@@ -102,8 +105,26 @@ export default function RequestsPage() {
     useEffect(() => {
         if (currentUser) {
             fetchRequests();
+            if (currentUser.role === 'sys') {
+                fetchDirections();
+            }
         }
     }, [currentUser]);
+
+    const fetchDirections = async () => {
+        try {
+            const token = getAuthToken();
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/directions`, {
+                headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setDirections(data);
+            }
+        } catch (error) {
+            console.error('Error fetching directions:', error);
+        }
+    };
 
     const getAuthToken = () => {
         return document.cookie
@@ -160,6 +181,9 @@ export default function RequestsPage() {
             formData.append('nom', data.nom);
             formData.append('category', data.category);
             formData.append('matricule', currentUser.matricule);
+            if (currentUser.role === 'sys' && data.directionId) {
+                formData.append('directionId', data.directionId);
+            }
             formData.append('file', selectedFile);
 
             const token = getAuthToken();
@@ -544,6 +568,40 @@ export default function RequestsPage() {
                                 </FormControl>
                             )}
                         />
+
+                        {currentUser?.role === 'sys' && (
+                            <Controller
+                                name="directionId"
+                                control={createForm.control}
+                                render={({ field, fieldState }) => (
+                                    <FormControl fullWidth error={!!fieldState.error}>
+                                        <InputLabel id="direction-label" sx={{ color: '#d1d5db' }}>Direction</InputLabel>
+                                        <Select
+                                            {...field}
+                                            labelId="direction-label"
+                                            label="Direction"
+                                            sx={{
+                                                color: 'white',
+                                                '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(234, 187, 28, 0.3)' },
+                                                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(234, 187, 28, 0.5)' },
+                                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#eabb1c' },
+                                                '& .MuiSvgIcon-root': { color: '#eabb1c' }
+                                            }}
+                                            MenuProps={{
+                                                PaperProps: {
+                                                    sx: { backgroundColor: '#1a1a1a', color: 'white' }
+                                                }
+                                            }}
+                                        >
+                                            {directions.map((dir) => (
+                                                <MenuItem key={dir._id} value={dir._id}>{dir.name}</MenuItem>
+                                            ))}
+                                        </Select>
+                                        {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}
+                                    </FormControl>
+                                )}
+                            />
+                        )}
 
                         <div className="flex flex-col gap-2">
                             <Typography variant="body2" sx={{ color: '#d1d5db' }}>Document (PDF requis)</Typography>

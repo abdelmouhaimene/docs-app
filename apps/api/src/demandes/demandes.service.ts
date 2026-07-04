@@ -6,6 +6,7 @@ import { CreateDemandeDto, UpdateDemandeDto } from './dto/create-demande.dto';
 import { UserRole } from '../users/schemas/user.schema';
 import { DocumentsService } from '../documents/documents.service';
 import { UsersService } from '../users/users.service';
+import { DirectionsService } from '../directions/directions.service';
 import { DocumentCategory } from '../documents/schemas/document.schema';
 
 @Injectable()
@@ -14,11 +15,24 @@ export class DemandesService {
         @InjectModel(Demande.name) private demandeModel: Model<DemandeDocument>,
         private documentsService: DocumentsService,
         private usersService: UsersService,
+        private directionsService: DirectionsService,
     ) { }
 
-    async create(createDemandeDto: CreateDemandeDto, file: Express.Multer.File): Promise<Demande> {
+    async create(createDemandeDto: CreateDemandeDto, file: Express.Multer.File, user: any): Promise<Demande> {
+        let directionId = createDemandeDto.directionId;
+
+        if (user.role !== UserRole.SYS) {
+            const requester = await this.usersService.findByMatricule(user.matricule);
+            if (requester && (requester as any).directionId) {
+                directionId = (requester as any).directionId.toString();
+            } else {
+                directionId = undefined; // Fallback or clear if non-sys user sent one maliciously
+            }
+        }
+
         const newDemande = new this.demandeModel({
             ...createDemandeDto,
+            directionId: directionId,
             filePath: file.filename,
             mimetype: file.mimetype,
             size: file.size,
@@ -94,9 +108,17 @@ export class DemandesService {
             // 1. Get requester info and their direction
             const requester = await this.usersService.findByMatricule(demande.matricule);
             let directionName = 'N/A';
+            let directionId = demande.directionId?.toString() || '';
 
-            let directionId = '';
-            if (requester) {
+            if (directionId) {
+                try {
+                    const direction = await this.directionsService.findOne(directionId);
+                    directionName = direction.name;
+                } catch (e) {
+                    console.error('Error fetching direction for integration', e);
+                }
+            } else if (requester) {
+                // Fallback to old behavior for backward compatibility if directionId is missing
                 const populatedRequester = await (requester as any).populate('directionId');
                 if (populatedRequester.directionId) {
                     directionName = populatedRequester.directionId.name;

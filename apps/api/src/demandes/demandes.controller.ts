@@ -53,11 +53,12 @@ export class DemandesController {
     create(
         @Body() createDemandeDto: CreateDemandeDto,
         @UploadedFile() file: Express.Multer.File,
+        @Request() req: any,
     ) {
         if (!file) {
             throw new BadRequestException('File is required');
         }
-        return this.demandesService.create(createDemandeDto, file);
+        return this.demandesService.create(createDemandeDto, file, req.user);
     }
 
     @Get()

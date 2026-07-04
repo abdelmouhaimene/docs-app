@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsOptional, IsBoolean } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsBoolean, IsMongoId } from 'class-validator';
 import { DemandeCategory } from '../schemas/demande.schema';
 
 export class CreateDemandeDto {
@@ -20,6 +20,11 @@ export class CreateDemandeDto {
     // File properties are typically handled by Multer but we validate them if passed manually or need to store them
     // In a typical upload flow, these might be extracted from the uploaded file object in the controller
     // But strictly following the schema fields for DB creation:
+    
+    @ApiProperty({ required: false, description: 'Optional direction ID (SYS user only)' })
+    @IsOptional()
+    @IsMongoId()
+    directionId?: string;
 }
 
 export class UpdateDemandeDto {
