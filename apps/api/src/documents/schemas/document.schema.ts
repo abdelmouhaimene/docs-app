@@ -11,6 +11,12 @@ export enum DocumentType {
     DRAFT = 'draft',
 }
 
+export enum DocumentStatus {
+    PENDING = 'pending',
+    APPROVED = 'approved',
+    REJECTED = 'rejected',
+}
+
 export type DocumentDocument = HydratedDocument<Document>;
 
 @Schema({ timestamps: true })
