@@ -171,4 +171,21 @@ export class DemandesService {
 
         await this.demandeModel.findByIdAndDelete(id).exec();
     }
+
+    async updateFile(id: string, file: Express.Multer.File, user: any): Promise<Demande> {
+        if (user.role !== UserRole.SYS) {
+            throw new ForbiddenException('Only system administrators can update files');
+        }
+
+        const demande = await this.demandeModel.findById(id).exec();
+        if (!demande) {
+            throw new NotFoundException(`Demande with ID ${id} not found`);
+        }
+
+        demande.filePath = file.filename;
+        demande.mimetype = file.mimetype;
+        demande.size = file.size;
+
+        return demande.save();
+    }
 }

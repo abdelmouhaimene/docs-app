@@ -79,6 +79,11 @@ export default function RequestsPage() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [directions, setDirections] = useState<any[]>([]);
 
+    // Update File State
+    const [updateFileOpen, setUpdateFileOpen] = useState(false);
+    const [updateFileTargetId, setUpdateFileTargetId] = useState('');
+    const [updateFileSelected, setUpdateFileSelected] = useState<File | null>(null);
+
     // Comments State
     const [commentsOpen, setCommentsOpen] = useState(false);
     const [commentTargetId, setCommentTargetId] = useState('');
@@ -208,6 +213,40 @@ export default function RequestsPage() {
             fetchRequests();
         } catch (error: any) {
             toast.error(error.message || 'Erreur lors de la création');
+        }
+    };
+
+    const handleOpenUpdateFile = (id: string) => {
+        setUpdateFileTargetId(id);
+        setUpdateFileSelected(null);
+        setUpdateFileOpen(true);
+    };
+
+    const submitUpdateFile = async () => {
+        if (!updateFileSelected) {
+            toast.error('Veuillez sélectionner un fichier');
+            return;
+        }
+        try {
+            const formData = new FormData();
+            formData.append('file', updateFileSelected);
+            const token = getAuthToken();
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/demandes/${updateFileTargetId}/file`, {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData,
+            });
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to update file');
+            }
+            toast.success('Fichier mis à jour avec succès');
+            setUpdateFileOpen(false);
+            setUpdateFileTargetId('');
+            setUpdateFileSelected(null);
+            fetchRequests();
+        } catch (error: any) {
+            toast.error(error.message || 'Erreur lors de la mise à jour');
         }
     };
 
@@ -451,6 +490,20 @@ export default function RequestsPage() {
                     );
                 }
 
+                // Sys admin can update file
+                if (role === 'sys') {
+                    actions.push(
+                        <GridActionsCellItem
+                            key="update-file"
+                            icon={<UploadIcon />}
+                            label="Mettre à jour le fichier"
+                            onClick={() => handleOpenUpdateFile(params.row._id)}
+                            showInMenu={false}
+                            sx={{ color: '#8b5cf6' }}
+                        />
+                    );
+                }
+
                 return actions;
             }
         }
@@ -642,6 +695,46 @@ export default function RequestsPage() {
                 targetType="demande"
                 targetName={commentTargetName}
             />
+
+            <Dialog
+                open={updateFileOpen}
+                onClose={() => setUpdateFileOpen(false)}
+                PaperProps={{
+                    sx: { backgroundColor: '#1a1a1a', color: 'white', border: '1px solid rgba(234, 187, 28, 0.2)' }
+                }}
+            >
+                <DialogTitle sx={{ color: '#eabb1c' }}>Mettre à jour le fichier</DialogTitle>
+                <DialogContent className="space-y-4 min-w-[400px]">
+                    <div className="flex flex-col gap-2 mt-2">
+                        <Typography variant="body2" sx={{ color: '#d1d5db' }}>Nouveau Document (PDF requis)</Typography>
+                        <Button
+                            component="label"
+                            variant="outlined"
+                            startIcon={<UploadIcon />}
+                            sx={{
+                                color: updateFileSelected ? '#eabb1c' : 'white',
+                                borderColor: 'rgba(234, 187, 28, 0.3)'
+                            }}
+                        >
+                            {updateFileSelected ? updateFileSelected.name : 'Choisir un fichier'}
+                            <input
+                                type="file"
+                                hidden
+                                accept="application/pdf"
+                                onChange={(e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                        setUpdateFileSelected(e.target.files[0]);
+                                    }
+                                }}
+                            />
+                        </Button>
+                    </div>
+                </DialogContent>
+                <DialogActions sx={{ p: 2 }}>
+                    <Button onClick={() => setUpdateFileOpen(false)} sx={{ color: 'white' }}>Annuler</Button>
+                    <Button onClick={submitUpdateFile} variant="contained" sx={{ backgroundColor: '#eabb1c', color: 'black' }}>Mettre à jour</Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }
